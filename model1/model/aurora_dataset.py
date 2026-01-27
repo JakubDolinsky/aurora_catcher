@@ -1,55 +1,99 @@
 import os
+from pathlib import Path
+
 from PIL import Image
 
 import pandas as pd
 
 import torch
-from mpmath.identification import transforms
+from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
-from torchaudio.functional import contrast
 
 from model1.model.data_preprocessing import PadToSquare, GaussianNoise
+from model1 import config
+
 
 
 class AuroraDataset(Dataset):
-    def __init__(self, root_dir, transform=None):
-        self.root_dir = root_dir
+
+    IMAGE_EXTENSIONS = {".jpg", ".jpeg"}
+
+    def __init__(self, dataset_dir, transform=None):
+        self.dataset_dir = Path(dataset_dir).resolve()
         self.transform = transform
-        labels_suffix= self.root_dir.split('_')[0]
-        csv_path = os.path.join(root_dir,f"labels_{labels_suffix}.csv")
-        self.data = pd.read_csv(csv_path)
+        csv_path = config.get_labels_csv(self.dataset_dir)
+        self.labels = pd.read_csv(csv_path)
+        self.image_files = [
+            f for f in os.listdir(self.dataset_dir)
+            if os.path.splitext(f)[1].lower() in self.IMAGE_EXTENSIONS
+        ]
+        self.labels_dict = dict(zip(self.labels['filename'], self.labels['label']))
 
     def __len__(self):
-        return len(self.data)
+        return len(self.image_files)
 
     def __getitem__(self, idx):
-        row = self.data.iloc[idx]
-        img_path = os.path.join(self.root_dir, row["filename"])
-        label = torch.tensor(row["label"], dtype=torch.float32)
+        img_name = self.image_files[idx]
+        img_path = os.path.join(self.dataset_dir, img_name)
         img = Image.open(img_path).convert('RGB')
+        label = torch.tensor(self.labels_dict[img_name], dtype=torch.float32)
+
         if self.transform:
             img = self.transform(img)
         return img, label
 
-#transformations
-train_transform = transforms.Compose([PadToSquare(256),
-                                      transforms.RandomApply([transforms.RandomRotation(8)], p = 0.4),
-                                      transforms.RandomApply([transforms.ColorJitter(brightness = 0.08, contrast = 0.08)], p = 0.7),
-                                      transforms.RandomApply([GaussianNoise(0.01)], p = 0.3),
-                                      transforms.ToTensor(),
-                                      transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-                                      ])
+#create transformation
+def build_transform(test):
+    if config.IS_128x128:
+        pdaToSquareSize = 128
+    else:
+        pdaToSquareSize = 256
+    if test:
+        # transform for test without augmentation
+        return transforms.Compose([
+            PadToSquare(pdaToSquareSize),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5, 0.5, 0.5],
+                                 std=[0.5, 0.5, 0.5])
+        ])
+    else:
+        # transform with augmentations for training
+        transform_components = []
+        transform_components.append(PadToSquare(pdaToSquareSize))
+        if config.ROTATION_APPLY:
+            transform_components.append(transforms.RandomApply([transforms.RandomRotation(degrees=5,
+                                                                                          interpolation=transforms.InterpolationMode.BICUBIC,
+                                                                                          expand=False, fill=0)], p=config.ROTATION_P))
+        if config.COLOR_JITTER_APPLY:
+            transform_components.append(transforms.RandomApply([transforms.ColorJitter(brightness=config.BRIGHTNESS, contrast=config.CONTRAST)],
+                                                               p=config.COLOR_JITTER_P))
+        transform_components.append(transforms.ToTensor())
+        if config.GAUSSIAN_NOISE_APPLY:
+            transform_components.append(transforms.RandomApply([GaussianNoise(config.GAUSSIAN_NOISE)],
+                                                               p = config.GAUSSIAN_NOISE_P))
+        transform_components.append(transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]))
 
-eval_transform = transforms.Compose([PadToSquare(256),
-                                     transforms.ToTensor(),
-                                     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
-                                     ])
+        return transforms.Compose(transform_components)
+
+#transformations
+train_transform = build_transform(False)
+eval_transform = build_transform(True)
 
 #dataloader
-train_dataset = AuroraDataset("train_256", train_transform)
-validation_dataset = AuroraDataset("validation_256", eval_transform)
-test_dataset = AuroraDataset("test_256", eval_transform)
+if config.IS_128x128:
+    train_dataset = AuroraDataset(config.TRAIN_128_DIR, train_transform)
+    validation_dataset = AuroraDataset(config.VAL_128_DIR, eval_transform)
 
-train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-validation_loader = DataLoader(validation_dataset, batch_size=16, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, shuffle=True)
+    validation_loader = DataLoader(validation_dataset, batch_size=config.BATCH_SIZE, shuffle=False)
+else:
+    train_dataset = AuroraDataset(config.TRAIN_256_DIR, train_transform)
+    validation_dataset = AuroraDataset(config.VAL_256_DIR, eval_transform)
+    test_dataset = AuroraDataset(config.TEST_256_DIR, eval_transform)
+
+    train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, shuffle=True)
+    validation_loader = DataLoader(validation_dataset, batch_size=config.BATCH_SIZE, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=config.BATCH_SIZE, shuffle=False)
+
+
+

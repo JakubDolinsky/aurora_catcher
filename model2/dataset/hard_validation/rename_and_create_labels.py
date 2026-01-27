@@ -15,9 +15,9 @@ label_dirs = [
 ]
 
 if not label_dirs:
-    raise RuntimeError("Nenasli sa ziadne podpriecinky (labely).")
+    raise RuntimeError("No subdirectories found (labels).")
 
-print("Najdene labely:", label_dirs)
+print("Labels found:", label_dirs)
 
 # CSV header
 header = ["filename"] + label_dirs
