@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 from torchvision import transforms
 from PIL import Image
 
-from model1 import config
-from model1.model.aurora_dataset import PadToSquare
+from model2 import config
+from model2.model.aurora_dataset import PadToSquare
+from model2.common.data_preprocessing import GaussianNoise
+
 from pathlib import Path
-
-from model1.common.data_preprocessing import GaussianNoise
-
 
 # ------------------------------------------------------------------
 # PROPOSED AUGMENTATION
