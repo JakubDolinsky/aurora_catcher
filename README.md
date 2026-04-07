@@ -3,8 +3,9 @@ Documentation for "Aurora catcher" application
 1. Brief Description
 
 a) As solar activity is currently approaching its peak, many people are turning their eyes and cameras toward the sky in hopes of witnessing one of the most fascinating 
-phenomena — the aurora, also known as the northern lights in the Northern Hemisphere. In many cases, the presence of aurora is not obvious and can easily be confused with 
-similar phenomena such as airglow or light pollution. To help users better determine whether aurora is present in their photos, I created this neural network–based application.
+phenomena — the aurora, also known as the northern lights in the Northern Hemisphere (or southern lights on south). In many cases, the presence of aurora is not obvious and easily 
+can be confused with similar phenomena such as airglow or light pollution. To help users better determine whether aurora is present in their photos, I created this neural 
+network–based application.
 
 b) Aurora can often be quite faint, making it difficult for people to clearly recognize and confirm its presence. The main goal of the application is to detect aurora in 
 photographs of the night or evening sky. If no real aurora is detected, the application also informs users about other phenomena that may resemble aurora and appear in their 
@@ -101,13 +102,22 @@ light pollution:0.397, lightning:0.129, milky way:0.266, NLC:0.127, twilight:0.2
 Val   | loss=0.1383, accuracy=0.944, F1=0.861, Precision=0.874, Rrecall=0.883, M_PROBS (NN output probabilities per class) = airglow:0.118, 
 light pollution:0.405, lightning:0.137, milky way:0.266, NLC:0.118, twilight:0.261, zodiacal light:0.094
 
+Test results for test and hard validation dataset: 
+Model 1:
+test dataset: Loss:0.0690, Accuracy:0.9796, Precision:0.9850, Recall:0.9714, F1 score:0.9781
+hard validation dataset: Loss:0.5167, Accuracy:0.8358, Precision:0.9375, Recall:0.6000, F1 score:0.7317
+
+Model 2:
+test dataset: Loss=0.1258, Accuracy=0.947, F1=0.873, Precision=0.852, Recall=0.898
+hard validation dataset: Loss=0.2979, Accuracy=0.886, F1=0.725, Precision=0.809, Recall=0.683
+
 6. Thresholds
 The output from the model is either a single probability value (from a sigmoid function) or a vector of probabilities per class. I wanted the application to provide users with
 relevant and honest information about aurora occurrence. It should not falsely confirm aurora when it is not present, and it should also not reject aurora if it is actually there.
 
 For Model 1, I defined probability intervals to improve the informational value of the result. For values below the lower threshold, the application returns false. 
 For values above the upper threshold, it returns true. For values between these thresholds, the application returns uncertain. This covers cases where it is difficult or 
-impossible to clearly confirm whether aurora is present.
+impossible to clearly confirm whether aurora is present or not.
 
 For Model 2, there is no interval like in Model 1. Instead, there is a single threshold: probabilities above it indicate the presence of a given phenomenon. 
 To provide more informative feedback, the application also includes the confidence level for each output.
@@ -260,6 +270,7 @@ The model’s ability to recognize "zodiacal light" is slightly less reliable th
 Mobile application
 API development
 Front-end improvements
-Enhancing the dataset for Model 2 to achieve more reliable results
+Enhancing the dataset for Model 2 and 1 to achieve more reliable results
+Better recognition of very weak aurora
 Extending the application to recognize additional astronomical phenomena, enabling general recognition of phenomena in the evening or night sky
 Using for classification of photos in personal dataset by sky phenomena
