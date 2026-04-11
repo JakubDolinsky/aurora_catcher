@@ -56,13 +56,13 @@ with torch.inference_mode():
 
 probs = torch.cat(all_probs).numpy()  # [N, C]
 targets = torch.cat(all_targets).numpy()  # [N, C]
-loss_val = np.mean(all_losses)  # priemer cez batch-e
+loss_val = np.mean(all_losses)  # mean through batch-e
 
 num_classes = len(config.CLASS_NAMES)
 threshold_grid = np.linspace(0.05, 0.95, 91)
 
 # --------------------
-# THRESHOLD SEARCH + KVANTILY
+# THRESHOLD SEARCH + QUANTILS
 # --------------------
 f1_thresholds = np.zeros(num_classes)
 low_q = np.zeros(num_classes)

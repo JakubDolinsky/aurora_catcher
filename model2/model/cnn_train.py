@@ -209,7 +209,7 @@ def main():
         num_classes=len(config.CLASS_NAMES)
     )
 
-    thresholds = torch.tensor(config.SIGMOID_THRESHOLDS, dtype=torch.float32)
+    thresholds = torch.tensor(config.DECISION_F1_THRESHOLDS, dtype=torch.float32)
     thresholds = thresholds.to(device)
     # ---- HEADER LOG ----
     log("=" * 80, log_file)

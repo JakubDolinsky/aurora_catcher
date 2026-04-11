@@ -46,18 +46,18 @@ def shuffle_files_in_directory(dir_path, extensions={".jpg", ".jpeg", ".png"}):
     if len(files) <= 1:
         return
 
-    # náhodné poradie
+    # random order
     shuffled = files[:]
     random.shuffle(shuffled)
 
-    # 1️⃣ dočasné názvy
+    # temporary names
     temp_names = []
     for i, f in enumerate(shuffled):
         tmp = f.with_name(f"__tmp__{i}{f.suffix}")
         f.rename(tmp)
         temp_names.append(tmp)
 
-    # 2️⃣ späť na pôvodné názvy, ale v inom poradí
+    # back to original names, but different order
     for tmp, original in zip(temp_names, files):
         tmp.rename(dir_path / original.name)
 
