@@ -19,11 +19,11 @@ e) results are processed and displayed to the user
 Both models are convolutional neural networks optimized for image classification.
 Model 1 is specialized for high-precision aurora detection, while Model 2 focuses on broader multi-class classification of similar sky phenomena.
 
-6. Key design decisions:
+5. Key design decisions:
 - two-staged inference pipeline (two separated models strictly specialized for each task: detecting aurora and distinguishing other phenomena than aurora)
 - adding uncertainty interval for final decisions (model says "I do not know" rather than making false positive/negative decisions if the signal is low)
 
-7. Dataset & Training
+6. Dataset & Training
 The models were trained on a dataset of over 16,000 night sky images containing aurora and other various astronomical and atmospheric phenomena. Dataset was
 built from publicly available photography sources and astronomy communities. Dataset was then cleaned and processed for 
 training purpose. 
@@ -41,7 +41,7 @@ Multi-class classification for non-aurora phenomena (classes such as: airglow, m
 Augmented dataset to improve robustness
 Train / validation / test split with additional hard-evaluation samples
 
-8.Results
+7. Results
 Test and hard validation metrics for model 1 and model 2.
 
 Model 1:
@@ -64,7 +64,7 @@ HARD VALIDATION dataset:
 Accuracy: 0.886
 F1 score: 0.725
 
-9. Limitations
+8. Limitations
 The system is designed for night sky photography only.
 
 Performance may degrade when:
