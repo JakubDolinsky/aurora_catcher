@@ -4,44 +4,34 @@ The system helps users determine whether aurora is present in an image, especial
 light pollution, or the Milky Way. The application is built as a complete end-to-end system with a graphical interface, allowing users to upload images and receive 
 real-time predictions.
 
-2. Key Features
-Detection of aurora presence in night sky images
-Classification of visually similar sky phenomena
-Uncertainty-aware decision making (avoids false positives/negatives in ambiguous cases)
-Fully interactive GUI for non-technical users
-Modular ML inference pipeline
+2. Problem and solution
+Sometimes it can be tricky to distinguish between aurora and similar phenomena in the night sky, or whether aurora is present. To solve this problem I designed
+two-stage computer vision pipeline.
 
-3. System Architecture
-The system is composed of three main layers:
+3. ML Pipeline
+a) user uploads an image via GUI
+b) image is validated and preprocessed
+c) model 1 predicts aurora presence
+d) if aurora is not detected, Model 2 is executed and identifies other possible sky phenomena
+e) results are processed and displayed to the user
 
-Presentation Layer (GUI):
-Handles image upload and user interaction
-Displays prediction results
-Allows saving outputs
+4. Model Design
+Both models are convolutional neural networks optimized for image classification.
+Model 1 is specialized for high-precision aurora detection, while Model 2 focuses on broader multi-class classification of similar sky phenomena.
 
-Mid Layer (Orchestration):
-Coordinates model execution
-Processes and formats predictions
-Handles decision logic between models
+6. Key design decisions:
+- two-staged inference pipeline (two separated models strictly specialized for each task: detecting aurora and distinguishing other phenomena than aurora)
+- adding uncertainty interval for final decisions (model says "I do not know" rather than making false positive/negative decisions if the signal is low)
 
-ML Layer (Core Models)
+7. Dataset & Training
+The models were trained on a dataset of over 16,000 night sky images containing aurora and other various astronomical and atmospheric phenomena. Dataset was
+built from publicly available photography sources and astronomy communities. Dataset was then cleaned and processed for 
+training purpose. 
 
-The system uses a two-stage model pipeline:
-
-Model 1: Detects whether aurora is present in the image
-Model 2: Activated only if aurora is not detected; identifies other possible sky phenomena
-
-This design improves reliability by separating high-precision detection from secondary classification tasks.
-
-4. ML Pipeline
-User uploads an image via GUI
-Image is validated and preprocessed
-Model 1 predicts aurora presence
-If aurora is not detected, Model 2 is executed
-Results are processed and displayed to the user
-
-5. Dataset & Training
-The models were trained on a dataset of over 16,000 night sky images containing arora and other multiple astronomical and atmospheric phenomena.
+The key part of the project was data labeling. Dataset for model 1 was created by collecting separate aurora and non-aurora images leading into binary labels.
+The non-aurora dataset was created by collecting images according to dominant phenomenon. Therefore, this dataset was partially labeled. To complete the labels 
+I used pseudolabeling approach. I trained the first version of model 2 using incompletely labeled data and then I used it to predict missing labels. Finally
+I reviewed results, completed and corrected missing or incorrect labels.
 
 Key characteristics:
 
@@ -51,43 +41,30 @@ Multi-class classification for non-aurora phenomena (classes such as: airglow, m
 Augmented dataset to improve robustness
 Train / validation / test split with additional hard-evaluation samples
 
-6. Model Design
-Both models are convolutional neural networks optimized for image classification.
+8.Results
+Test and hard validation metrics for model 1 and model 2.
 
-Design highlights:
+Model 1:
+Accuracy: 0.9796
+Precision: 0.9850
+Recall: 0.9714 
+F1 score: 0.9781
 
-CNN-based architecture
-Batch normalization and regularization techniques
-Optimized using AdamW optimizer
-Early stopping and learning rate scheduling
+HARD VALIDATION dataset:
+Accuracy: 0.8358
+F1 score: 0.7317
 
-Model 1 is optimized for high-precision aurora detection, while Model 2 focuses on broader multi-class classification of similar sky phenomena.
+Model 2:
+Accuracy: 0.947
+Precision: 0.852
+Recall: 0.898
+F1 score: 0.873
 
-7. Reliability & Decision Logic
-To improve robustness in ambiguous cases, the system uses confidence-based decision logic:
+HARD VALIDATION dataset: 
+Accuracy: 0.886
+F1 score: 0.725
 
-Clear predictions when confidence is high
-“Uncertain” state in borderline cases
-Reduced risk of false aurora detection
-
-This approach improves real-world usability, especially for faint or visually ambiguous aurora events.
-
-8. Results (Summary)
-Model performance:
-
-Model 1 (Aurora detection)
-High accuracy on standard test data, with expected performance drop on extreme edge cases
-Model 2 (Phenomena classification)
-Strong multi-class classification performance across 7 sky phenomena categories
-
-9. How to Use
-Run the application executable (located  in aurora_catcher\aurora catchern application\dist\AuroraCatcher)
-Upload a supported image (night sky photo)
-Click “Detect Aurora”
-View results in the output window
-Optionally save results as a text file
-
-10. Limitations
+9. Limitations
 The system is designed for night sky photography only.
 
 Performance may degrade when:
@@ -95,13 +72,8 @@ Performance may degrade when:
 - images contain daylight scenes or other scenes than night sky scenes
 - input quality is very low or heavily distorted
 
-11. Future Improvements
-Deployment as web API
-Mobile application support
-Dataset expansion for rare aurora cases
-Improved detection of extremely faint aurora events
-Extension to broader astronomical scene classification
+For more technical details: docs\technical.txt
 
-For better technical detail aurora catchern application\docs\technical.txt
+You can try out demo application here: https://huggingface.co/spaces/kubizmus/aurora_catcher (upload pictures of night sky containing or not containing aurora)
 
-You can try out demo application here: https://huggingface.co/spaces/kubizmus/aurora_catcher
+Github repo: https://github.com/JakubDolinsky/aurora_catcher.git
