@@ -208,7 +208,7 @@ def main():
         validation_loader.dataset,
         num_classes=len(config.CLASS_NAMES)
     )
-
+#in first training run thresholds were set on 0.5 values
     thresholds = torch.tensor(config.DECISION_F1_THRESHOLDS, dtype=torch.float32)
     thresholds = thresholds.to(device)
     # ---- HEADER LOG ----

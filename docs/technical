@@ -299,6 +299,10 @@ contain evening, night and twilight scenes with sky. Also models have been train
 or makro scenes etc. can lead into unreliable results. 
 
 12. Future improvements:
+There are default parameters set for normalization. But the better way would be to calculate real values from the train dataset. Improving this could lead into 
+better results in aurora detection or specifying non aurroa phenomena ( (transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])) ). mean shoul be calculated 
+as mean value of pixels for each channel (R,G,B) and std is standard deviation for each channel.
+After tuning all hyperparameters using validation set, that set could be merged into train dataset and the final training could be made with bigger dataset.
 Mobile application
 API development
 Front-end improvements

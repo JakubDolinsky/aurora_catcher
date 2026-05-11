@@ -45,7 +45,7 @@ with torch.inference_mode():
         labels = labels.to(device)
         logits = model(imgs)
 
-        # loss pre batch
+        # loss for batch
         batch_loss = criterion(logits, labels)
         all_losses.append(batch_loss.item())
 
